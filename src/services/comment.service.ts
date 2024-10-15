@@ -3,7 +3,7 @@ import { IArticle } from '../models/article.model';
 import mongoose, { Types } from 'mongoose';
 import { IPopulatedComment } from '../interface/comment.interface';
 
-import { createCommentToArticle, eraseCommentFromArticle } from './article.service';
+import { createCommentToArticle, deleteCommentFromArticle } from './article.service';
 
 export const createComment = async (text: string, authorId: Types.ObjectId): Promise<IComment> => {
     const comment: IComment = await Comment.create({
@@ -15,7 +15,7 @@ export const createComment = async (text: string, authorId: Types.ObjectId): Pro
     return comment;
 }
 
-export const transactionCreateCommentToArticle = async (text: string, authorId: Types.ObjectId, articleId: Types.ObjectId): Promise<boolean> => {
+export const transactionCreateCommentToArticle = async (text: string, authorId: Types.ObjectId, articleId: Types.ObjectId): Promise<Types.ObjectId | null> => {
     const session = await mongoose.startSession();
     session.startTransaction();
     const comment: IComment = await createComment(text, authorId);
@@ -23,8 +23,8 @@ export const transactionCreateCommentToArticle = async (text: string, authorId: 
     const postComment: IArticle | null = await createCommentToArticle(commentId, articleId);
     session.commitTransaction();
 
-    if (postComment) return true;
-    return false;
+    if (!postComment) return null;
+    return commentId;
 }
 
 export const getCommentById = async (commentId: Types.ObjectId): Promise<IComment | null> => {
@@ -32,21 +32,28 @@ export const getCommentById = async (commentId: Types.ObjectId): Promise<ICommen
     return comment;
 }
 
-export const eraseCommentById = async (commentId: Types.ObjectId): Promise<IComment | null> => {
+export const deleteCommentById = async (commentId: Types.ObjectId): Promise<IComment | null> => {
     const comment: IComment | null = await Comment.findByIdAndDelete(commentId)
     return comment;
 }
 
-export const transactionEraseCommentToArticle = async (commentId: Types.ObjectId, articleId: Types.ObjectId): Promise<boolean> => {
+export const transactionDeleteCommentFromArticle = async (commentId: Types.ObjectId, articleId: Types.ObjectId): Promise<boolean> => {
     const session = await mongoose.startSession();
     session.startTransaction();
-    const eraseComment: IComment | null = await eraseCommentById(commentId);
-    if(!eraseComment) return false;
 
-    const postComment: IArticle | null = await eraseCommentFromArticle(commentId, articleId);
-    session.commitTransaction();
+    const deleteComment: IComment | null = await deleteCommentById(commentId);
+    if (!deleteComment) { 
+        await session.abortTransaction();
+        return false;
+    }
 
-    if (!postComment) return false;
+    const postComment: IArticle | null = await deleteCommentFromArticle(commentId, articleId);
+    if (!postComment) {
+        await session.abortTransaction();
+        return false;
+    }
+
+    await session.commitTransaction();
     return true;
 }
 

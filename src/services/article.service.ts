@@ -83,7 +83,7 @@ export const createCommentToArticle = async(commentId: Types.ObjectId, articleId
     return updatedArticle;
 }
 
-export const eraseCommentFromArticle = async(commentId: Types.ObjectId, articleId: Types.ObjectId): Promise<IArticle | null> => {
+export const deleteCommentFromArticle = async(commentId: Types.ObjectId, articleId: Types.ObjectId): Promise<IArticle | null> => {
     const updatedArticle = await Article.findOneAndUpdate(
         {
             _id: articleId
@@ -157,3 +157,12 @@ export const updateArticle = async(articleId: Types.ObjectId, data: UpdateArticl
 
     return updatedArticle;
 }
+
+export const deleteArticle = async(articleId: Types.ObjectId): Promise<IArticle | null> => {
+    const deletedArticle = await Article.findOneAndDelete(articleId);
+    return deletedArticle;
+}
+
+// export const transactionDeleteArticleWithCommentAndBookmark(articleId: Types.ObjectId): Promise<boolean> => {
+
+// }

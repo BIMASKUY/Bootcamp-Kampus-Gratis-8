@@ -23,7 +23,13 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
                 data: err.data
             })
         }
-        else res.status(500).send(`error: ${err.message}`);
+        else {
+            res.status(500).json({
+                success: false,
+                message: err.message,
+                data: {}
+            })
+        }
     }
     next();
 }

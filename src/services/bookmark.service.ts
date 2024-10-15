@@ -26,6 +26,15 @@ export const deleteBookmarkById = async (bookmarkId: Types.ObjectId): Promise<IB
     return bookmark;
 }
 
+export const deleteBookmarkByArticleId = async (articleId: Types.ObjectId, userId: Types.ObjectId): Promise<IBookmark | null> => {
+    const bookmark: IBookmark | null = await Bookmark.findOneAndDelete({
+        article: articleId,
+        user: userId
+    });
+
+    return bookmark;
+}
+
 export const getBoorkmarks = async (userId: Types.ObjectId): Promise<IBookmark[]> => {
     const bookmarks: IBookmark[] = await Bookmark.find({
         user: userId
