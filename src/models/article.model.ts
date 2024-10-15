@@ -1,17 +1,11 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-// interface IComment {
-//     text: string;
-//     likes: Types.ObjectId[];
-// }
-
 export interface IArticle extends Document {
     title: string;
     content: string;
     author: Types.ObjectId;
     likedBy: Types.ObjectId[];
     comments: Types.ObjectId[];
-    // comments: IComment[];
 }
 
 const articleSchema = new Schema({
@@ -34,15 +28,7 @@ const articleSchema = new Schema({
     }],
     comments: [{
         type: Types.ObjectId,
-        ref: 'Comment',
-        // text: {
-        //     type: String,
-        //     required: true
-        // },
-        // likes: [{
-        //     type: Types.ObjectId,
-        //     ref: 'User'
-        // }]
+        ref: 'Comment'
     }]
 }, {
     timestamps: true

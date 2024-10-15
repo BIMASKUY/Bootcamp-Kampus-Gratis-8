@@ -6,8 +6,7 @@ export interface IPopulatedComment extends Pick <IComment, 'text'> {
     likedBy: IUser[]
 }
 
-export interface IFormattedComment {
-    text: string,
+export interface IFormattedComment extends Pick <IComment, 'text'> {
     author: string,
     likedBy: string[]
 }

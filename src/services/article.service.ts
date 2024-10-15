@@ -26,7 +26,17 @@ export const getPopulatedArticleById = async (id: Types.ObjectId): Promise<IPopu
     const article: IArticle | null = await getArticleById(id);
     if (!article) return null;
 
-    const populatedArticle: IPopulatedArticle = await article.populate('author');
+    const populatedArticle: IPopulatedArticle = await article.populate([
+        'author', 
+        'likedBy', 
+        {
+            path: 'comments',
+            populate: {
+                path: 'author likedBy'
+            },
+        },
+    ]);
+
     return populatedArticle;
 }
 
@@ -45,13 +55,12 @@ export const getPopulatedArticles = async (): Promise<IPopulatedArticle[]> => {
                 { 
                     path: 'comments',
                     populate: { 
-                        path: 'authorId' 
+                        path: 'author likedBy',
                     } 
                 },
             ])
         )
     );
-    console.log(populatedArticles)
     return populatedArticles;
 }
 
@@ -82,6 +91,44 @@ export const eraseCommentFromArticle = async(commentId: Types.ObjectId, articleI
         {
             $pull: {
                 comments: commentId
+            }
+        },
+        {
+            runValidators: true,
+            new: true
+        }
+    )
+
+    return updatedArticle;
+}
+
+export const likeArticle = async(articleId: Types.ObjectId, userId: Types.ObjectId): Promise<IArticle | null> => {
+    const updatedArticle = await Article.findOneAndUpdate(
+        {
+            _id: articleId
+        },
+        {
+            $addToSet: {
+                likedBy: userId
+            }
+        },
+        {
+            runValidators: true,
+            new: true
+        }
+    )
+
+    return updatedArticle;
+}
+
+export const unlikeArticle = async(articleId: Types.ObjectId, userId: Types.ObjectId): Promise<IArticle | null> => {
+    const updatedArticle = await Article.findOneAndUpdate(
+        {
+            _id: articleId
+        },
+        {
+            $pull: {
+                likedBy: userId
             }
         },
         {
