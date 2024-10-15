@@ -1,6 +1,6 @@
 import { IArticle, Article } from '../models/article.model';
 import { Types } from 'mongoose';
-import { CreateArticleType } from '../schema/article.schema';
+import { CreateArticleType, UpdateArticleType } from '../schema/article.schema';
 import { IPopulatedArticle } from '../interface/article.interface'
 
 export const createArticle = async (data: CreateArticleType, idAuthor: Types.ObjectId): Promise<IArticle> => {
@@ -130,6 +130,24 @@ export const unlikeArticle = async(articleId: Types.ObjectId, userId: Types.Obje
             $pull: {
                 likedBy: userId
             }
+        },
+        {
+            runValidators: true,
+            new: true
+        }
+    )
+
+    return updatedArticle;
+}
+
+export const updateArticle = async(articleId: Types.ObjectId, data: UpdateArticleType): Promise<IArticle | null> => {
+    const updatedArticle = await Article.findOneAndUpdate(
+        {
+            _id: articleId
+        },
+        {
+            title: data.title,
+            content: data.content
         },
         {
             runValidators: true,

@@ -9,6 +9,8 @@ import { formattedArticle, formattedArticles } from '../utils/article.util';
 import { 
 	CreateArticleType,
 	validateInputCreateArticleSchema,
+    UpdateArticleType,
+    validateUpdateArticleSchema
 } from '../schema/article.schema';
 
 import { 
@@ -17,7 +19,8 @@ import {
 	getPopulatedArticleById,
     likeArticle,
     unlikeArticle,
-    getArticleById
+    getArticleById,
+    updateArticle
 } from '../services/article.service';
 
 export const create = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
@@ -75,6 +78,35 @@ export const likes = async (req: Request, res: Response, next: NextFunction) : P
             success: true,
             data: formatArticle,
             message
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const update = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+    try {
+        const userReq: IUserRequest = req as IUserRequest;
+        const data: UpdateArticleType = validateUpdateArticleSchema(req.body);
+        const articleId: Types.ObjectId = new Types.ObjectId(req.params.articleId);
+        const article: IArticle | null = await getArticleById(articleId);
+        if (!article) throw new ResponseError(404, 'Artikel tidak ditemukan');
+        if (!article.author.equals(userReq.userId)) throw new ResponseError(403, 'Tidak memiliki hak akses untuk mengupdate artikel ini');
+
+        if (!data.title) data.title = article.title;
+        if (!data.content) data.content = article.content;
+        const updatedArticle: IArticle | null = await updateArticle(articleId, data);
+        if (!updatedArticle) throw new ResponseError(500, 'Gagal mengupdate artikel');
+
+        const populatedArticle: IPopulatedArticle | null = await getPopulatedArticleById(updatedArticle.id);
+        if (!populatedArticle) throw new ResponseError(404, 'Artikel tidak ditemukan');
+
+        const formatArticle: IFormattedArticle = formattedArticle(populatedArticle);
+
+        res.status(200).json({
+            success: true,
+            data: formatArticle,
+            message: 'Artikel berhasil diupdate'
         });
     } catch (e) {
         next(e);

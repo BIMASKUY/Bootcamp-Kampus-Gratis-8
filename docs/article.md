@@ -20,15 +20,15 @@ Reponse Body Success :
 
 ```json
 {
-    "success" : true,
-    "data" : {
-        "title" : "Tutorial Backend KG",
-        "content" : "Langkah awal...",
-        "author" : "Aryo",
-        "likedBy" : [],
-        "comments" : []
+    "success": true,
+    "data": {
+        "title": "Tutorial Backend KG",
+        "content": "Langkah awal...",
+        "author": "Bambang 123",
+        "likedBy": [],
+        "comments": []
     },
-    "message" : "Artikel berhasil dibuat"
+    "message": "Artikel berhasil dibuat"
 }
 ```
 Response Body Error : 
@@ -49,41 +49,41 @@ Response Body Success :
 
 ```json
 {
-    "data" : [
-    {
-        "title" : "Tutorial Backend KG",
-        "author" : "Aryo",
-        "likes" : ["mulyono", "fufufafa"],
-        "comments" : ["artikelnya keren", "artikelnya membantu"]
-    },
-    {
-        "title" : "Tutorial Daftar KG",
-        "author" : "John",
-        "likes" : ["budi", "hermansyah"],
-        "comments" : ["artikel bermanfaat, kampusnya keren"]
-    }
+    "success": true,
+    "data": [
+        {
+            "title": "Tutorial Update Backend KG",
+            "content": "Awal awal siapkan...",
+            "author": "Bambang 123",
+            "likedBy": [
+                "Bims Kuy"
+            ],
+            "comments": [
+                {
+                    "text": "tester 1",
+                    "author": "Bambang 123",
+                    "likedBy": [
+                        "Bambang 123",
+                        "Bims Kuy"
+                    ]
+                }
+            ]
+        }
     ],
-    "message" : "Artikel berhasil didapatkan"
+    "message": "Berhasil mendapatkan artikel"
 }
 ```
 
+## Update Article API
 
-
-
-
-
-
-
-## Login User API
-
-Endpoint : POST /api/users/login
+Endpoint : FETCH /api/articles/:articleId
 
 Request Body : 
 
 ```json
 {
-    "email" : "bambang@gmail.com",
-    "password" : "rahasia123"
+    "title" : "Tutorial Update Backend KG", //optional
+    "content" : "Awal awal siapkan..." //optional
 }
 ```
 
@@ -91,43 +91,26 @@ Response Body Success :
 
 ```json
 {
-    "data" : {
-        "token" : "jwt-token"
+    "success": true,
+    "data": {
+        "title": "Tutorial Update Backend KG",
+        "content": "Awal awal siapkan...",
+        "author": "Bambang 123",
+        "likedBy": [
+            "Bims Kuy"
+        ],
+        "comments": [
+            {
+                "text": "tester 1",
+                "author": "Bambang 123",
+                "likedBy": [
+                    "Bambang 123",
+                    "Bims Kuy"
+                ]
+            }
+        ]
     },
-    "message" : "Login berhasil"
-}
-```
-
-Request Body Error : 
-
-```json
-{
-    "errors" : "Username atau password salah"
-}
-```
-
-## Update User API
-
-Endpoint : FETCH /api/users/update
-
-Request Body : 
-
-```json
-{
-    "name" : "Bambang Baru", //optional
-    "password" : "password baru" //optional
-}
-```
-
-Response Body Success : 
-
-```json
-{
-    "data" : {
-        "username" : "bambang@gmail.com",
-        "name" : "Bambang Baru",
-    },
-    "message": "User berhasil diperbarui"
+    "message": "Artikel berhasil diupdate"
 }
 ```
 
@@ -135,44 +118,22 @@ Response Body Error :
 
 ```json
 {
-    "errors" : "Panjang nama maksimal 100 karakter"
+    "success": false,
+    "message": "Tidak memiliki hak akses untuk mengupdate artikel ini",
+    "data": {}
 }
 ```
 
-## Get User API
 
-Endpoint : GET /api/users
 
-Headers :
-- Authorization : token
 
-Response Body Success : 
 
-```json
-{
-    "data" : {
-        "email" : "bambang@gmail.com",
-        "name" : "Bambang Baru"
-    },
-    "message" : "Data anda berhasil didapatkan"
-}
-```
 
-Response Body Error : 
 
-```json
-{
-    "errors" : "Unauthorized"
-}
-```
 
-Response Body Error : 
 
-```json
-{
-    "errors" : "User tidak ditemukan"
-}
-```
+
+
 
 ## Logout User API
 
