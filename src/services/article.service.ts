@@ -1,7 +1,9 @@
 import { IArticle, Article } from '../models/article.model';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { CreateArticleType, UpdateArticleType } from '../schema/article.schema';
 import { IPopulatedArticle } from '../interface/article.interface'
+import { deleteCommentById } from './comment.service';
+import { deleteBookmarksByArticleId } from './bookmark.service';
 
 export const createArticle = async (data: CreateArticleType, idAuthor: Types.ObjectId): Promise<IArticle> => {
     const article: IArticle = await Article.create({
@@ -158,11 +160,50 @@ export const updateArticle = async(articleId: Types.ObjectId, data: UpdateArticl
     return updatedArticle;
 }
 
-export const deleteArticle = async(articleId: Types.ObjectId): Promise<IArticle | null> => {
+export const deleteArticleById = async(articleId: Types.ObjectId): Promise<IArticle | null> => {
     const deletedArticle = await Article.findOneAndDelete(articleId);
     return deletedArticle;
 }
 
-// export const transactionDeleteArticleWithCommentAndBookmark(articleId: Types.ObjectId): Promise<boolean> => {
+export const transactionDeleteArticleWithCommentAndBookmark = async(articleId: Types.ObjectId): Promise<boolean> => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-// }
+    const article: IArticle | null = await getArticleById(articleId);
+    if (!article) {
+        await session.abortTransaction();
+        await session.endSession();
+        return false;
+    }
+    
+    const commentIds = article.comments;
+    const deletePromises = commentIds.map(commentId => deleteCommentById(commentId));
+    const deleteResults = await Promise.all(deletePromises);
+
+    const isFailedDeleteComment = deleteResults.some(result => !result); //fail disini
+    if (isFailedDeleteComment) {
+        await session.abortTransaction();
+        await session.endSession();
+        return false;
+    }
+
+    console.log('halo dek')
+
+    const deleteBookmarks = await deleteBookmarksByArticleId(articleId);
+    if (!deleteBookmarks) {
+        await session.abortTransaction();
+        await session.endSession();
+        return false;
+    }
+
+    const deletedArticle = await deleteArticleById(articleId);
+    if (!deletedArticle) {
+        await session.abortTransaction();
+        await session.endSession();
+        return false;
+    }
+
+    await session.commitTransaction();
+    await session.endSession();
+    return true;
+}

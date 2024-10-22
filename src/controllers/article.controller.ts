@@ -20,7 +20,8 @@ import {
     likeArticle,
     unlikeArticle,
     getArticleById,
-    updateArticle
+    updateArticle,
+    transactionDeleteArticleWithCommentAndBookmark
 } from '../services/article.service';
 
 export const create = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
@@ -113,23 +114,23 @@ export const update = async (req: Request, res: Response, next: NextFunction) : 
     }
 }
 
-// export const deletes = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
-//     try {
-//         const userReq: IUserRequest = req as IUserRequest;
-//         const articleId: Types.ObjectId = new Types.ObjectId(req.params.articleId);
-//         const article: IArticle | null = await getArticleById(articleId);
-//         if (!article) throw new ResponseError(404, 'Artikel tidak ditemukan');
-//         if (!article.author.equals(userReq.userId)) throw new ResponseError(403, 'Tidak memiliki hak akses untuk menghapus artikel ini');
+export const deletes = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+    try {
+        const userReq: IUserRequest = req as IUserRequest;
+        const articleId: Types.ObjectId = new Types.ObjectId(req.params.articleId);
+        const article: IArticle | null = await getArticleById(articleId);
+        if (!article) throw new ResponseError(404, 'Artikel tidak ditemukan');
+        if (!article.author.equals(userReq.userId)) throw new ResponseError(403, 'Tidak memiliki hak akses untuk menghapus artikel ini');
 
-//         const success: boolean = await article.remove();
-//         if (!success) throw new ResponseError(500, 'Gagal menghapus artikel');
+        const success: boolean = await transactionDeleteArticleWithCommentAndBookmark(articleId);
+        if (!success) throw new ResponseError(500, 'Gagal menghapus artikel');
 
-//         res.status(200).json({
-//             success: true,
-//             message: 'Artikel berhasil dihapus',
-//             data: {}
-//         });
-//     } catch (e) {
-//         next(e);
-//     }
-// }
+        res.status(200).json({
+            success: true,
+            message: 'Artikel berhasil dihapus',
+            data: {}
+        });
+    } catch (e) {
+        next(e);
+    }
+}

@@ -10,7 +10,7 @@ import { getArticleById } from '../services/article.service';
 
 import {
     createBookmark,
-    getBoorkmarkByArticleId,
+    getBookmarkByArticleId,
     deleteBookmarkById,
     getPopulatedBookmarks,
     getPopulatedBookmarkById
@@ -23,7 +23,7 @@ export const create = async (req: Request, res: Response, next: NextFunction): P
         const article: IArticle | null = await getArticleById(articleId);
         if (!article) throw new ResponseError(404, 'Artikel tidak ditemukan');
 
-        const isBookmarked: IBookmark | null = await getBoorkmarkByArticleId(articleId, userReq.userId);
+        const isBookmarked: IBookmark | null = await getBookmarkByArticleId(articleId, userReq.userId);
         if (isBookmarked) throw new ResponseError(400, 'Artikel sudah ada dalam daftar bookmark');
 
         const bookmark: IBookmark = await createBookmark(articleId, userReq.userId);
@@ -55,7 +55,7 @@ export const deletes = async (req: Request, res: Response, next: NextFunction): 
         const article: IArticle | null = await getArticleById(articleId);
         if (!article) throw new ResponseError(404, 'Artikel tidak ditemukan');
 
-        const isBookmarked: IBookmark | null = await getBoorkmarkByArticleId(articleId, userReq.userId);
+        const isBookmarked: IBookmark | null = await getBookmarkByArticleId(articleId, userReq.userId);
         if (!isBookmarked) throw new ResponseError(400, 'Artikel tidak ada dalam daftar bookmark');
 
         const bookmarkId: Types.ObjectId = isBookmarked._id as Types.ObjectId;

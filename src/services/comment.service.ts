@@ -21,9 +21,15 @@ export const transactionCreateCommentToArticle = async (text: string, authorId: 
     const comment: IComment = await createComment(text, authorId);
     const commentId: Types.ObjectId = comment._id as Types.ObjectId;
     const postComment: IArticle | null = await createCommentToArticle(commentId, articleId);
-    session.commitTransaction();
+    
+    if (!postComment) {
+        await session.abortTransaction();
+        await session.endSession();
+        return null;
+    }
+    await session.commitTransaction();
+    await session.endSession();
 
-    if (!postComment) return null;
     return commentId;
 }
 
@@ -34,6 +40,7 @@ export const getCommentById = async (commentId: Types.ObjectId): Promise<ICommen
 
 export const deleteCommentById = async (commentId: Types.ObjectId): Promise<IComment | null> => {
     const comment: IComment | null = await Comment.findByIdAndDelete(commentId)
+    console.log(comment)
     return comment;
 }
 
@@ -44,16 +51,19 @@ export const transactionDeleteCommentFromArticle = async (commentId: Types.Objec
     const deleteComment: IComment | null = await deleteCommentById(commentId);
     if (!deleteComment) { 
         await session.abortTransaction();
+        await session.endSession();
         return false;
     }
 
     const postComment: IArticle | null = await deleteCommentFromArticle(commentId, articleId);
     if (!postComment) {
         await session.abortTransaction();
+        await session.endSession();
         return false;
     }
 
     await session.commitTransaction();
+    await session.endSession();
     return true;
 }
 

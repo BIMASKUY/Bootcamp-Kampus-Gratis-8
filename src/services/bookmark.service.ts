@@ -11,7 +11,7 @@ export const createBookmark = async (articleId: Types.ObjectId, userId: Types.Ob
     return bookmark;
 }
 
-export const getBoorkmarkByArticleId = async (articleId: Types.ObjectId, userId: Types.ObjectId): Promise<IBookmark | null> => {
+export const getBookmarkByArticleId = async (articleId: Types.ObjectId, userId: Types.ObjectId): Promise<IBookmark | null> => {
     const bookmark: IBookmark | null = await Bookmark.findOne({
         article: articleId,
         user: userId
@@ -35,7 +35,15 @@ export const deleteBookmarkByArticleId = async (articleId: Types.ObjectId, userI
     return bookmark;
 }
 
-export const getBoorkmarks = async (userId: Types.ObjectId): Promise<IBookmark[]> => {
+export const deleteBookmarksByArticleId = async (articleId: Types.ObjectId): Promise<boolean> => {
+    await Bookmark.deleteMany({
+        article: articleId
+    });
+
+    return true
+}
+
+export const getBookmarks = async (userId: Types.ObjectId): Promise<IBookmark[]> => {
     const bookmarks: IBookmark[] = await Bookmark.find({
         user: userId
     });
@@ -43,13 +51,13 @@ export const getBoorkmarks = async (userId: Types.ObjectId): Promise<IBookmark[]
     return bookmarks;
 }
 
-export const getBoorkmarksById = async (bookmarkId: Types.ObjectId): Promise<IBookmark | null> => {
+export const getBookmarksById = async (bookmarkId: Types.ObjectId): Promise<IBookmark | null> => {
     const bookmark: IBookmark | null = await Bookmark.findById(bookmarkId);
     return bookmark;
 }
 
 export const getPopulatedBookmarkById = async (bookmarkId: Types.ObjectId): Promise<IPopulatedBookmark | null> => {
-    const bookmark: IBookmark | null = await getBoorkmarksById(bookmarkId);
+    const bookmark: IBookmark | null = await getBookmarksById(bookmarkId);
     if (!bookmark) return null;
 
     const populatedBookmark: IPopulatedBookmark | null = await bookmark.populate('article');
@@ -57,7 +65,7 @@ export const getPopulatedBookmarkById = async (bookmarkId: Types.ObjectId): Prom
 }
 
 export const getPopulatedBookmarks = async (userId: Types.ObjectId): Promise<IPopulatedBookmark[]> => {
-    const bookmarks: IBookmark[] = await getBoorkmarks(userId);
+    const bookmarks: IBookmark[] = await getBookmarks(userId);
 
     const populatedBookmarks: IPopulatedBookmark[] = await Promise.all(bookmarks.map(
         async (bookmark: IBookmark) => {
