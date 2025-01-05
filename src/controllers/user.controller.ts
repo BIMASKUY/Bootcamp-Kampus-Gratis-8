@@ -13,11 +13,13 @@ import {
   UpdateUserType,
   ForgetUserType,
   ResetUserType,
+  DuplicateUserType,
   validateInputUserSchema,
   validateInputLoginUserSchema,
   validateInputUpdateUserSchema,
   validateInputForgetUserSchema,
-  validateInputResetUserSchema
+  validateInputResetUserSchema,
+  validateInputDuplicateUserSchema
 } from '../schema/user.schema';
 
 import { 
@@ -175,6 +177,22 @@ export const reset = async (req: Request, res: Response, next: NextFunction) : P
       data: {
         email: user.email
       }
+    });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export const duplicate = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+  try {
+    const data: DuplicateUserType = validateInputDuplicateUserSchema(req.body);
+    const user: IUser | null = await getUserByEmail(data.email);
+    if (user) throw new ResponseError(409, 'Email sudah digunakan');
+
+    res.status(200).json({
+      success: true,
+      message: 'Email tersedia',
+      data: {}
     });
   } catch (e) {
     next(e);

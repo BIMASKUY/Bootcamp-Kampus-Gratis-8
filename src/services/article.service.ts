@@ -1,7 +1,7 @@
 import { IArticle, Article } from '../models/article.model';
 import mongoose, { Types } from 'mongoose';
 import { CreateArticleType, UpdateArticleType } from '../schema/article.schema';
-import { IPopulatedArticle } from '../interface/article.interface'
+import { IPopulatedArticle, ISearchArticle } from '../interface/article.interface'
 import { deleteCommentById } from './comment.service';
 import { deleteBookmarksByArticleId } from './bookmark.service';
 
@@ -47,9 +47,9 @@ export const getArticles = async (): Promise<IArticle[]> => {
     return articles;
 }
 
-export const getPopulatedArticles = async (): Promise<IPopulatedArticle[]> => {
+export const getPopulatedArticles = async (search: ISearchArticle): Promise<IPopulatedArticle[]> => {
     const articles: IArticle[] = await getArticles();
-    const populatedArticles: IPopulatedArticle[] = await Promise.all(
+    let populatedArticles: IPopulatedArticle[] = await Promise.all(
         articles.map(
             async article => await article.populate([
                 'author', 
@@ -63,6 +63,13 @@ export const getPopulatedArticles = async (): Promise<IPopulatedArticle[]> => {
             ])
         )
     );
+
+    // filter articles (if any)
+    const { title, content, author } = search;
+    if (title) populatedArticles = populatedArticles.filter(populatedArticle => populatedArticle.title.includes(title));
+    if (content) populatedArticles = populatedArticles.filter(populatedArticle => populatedArticle.content.includes(content));
+    if (author) populatedArticles = populatedArticles.filter(populatedArticle => populatedArticle.author.name.includes(author));
+    
     return populatedArticles;
 }
 

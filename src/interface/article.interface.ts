@@ -13,3 +13,7 @@ export interface IFormattedArticle extends Pick <IArticle, 'title' | 'content'> 
     likedBy: string[]
     comments: IFormattedComment[]
 }
+
+export interface ISearchArticle extends Partial<Pick<IArticle, 'title' | 'content'>> {
+    author?: string;
+}

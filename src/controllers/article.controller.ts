@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { IArticle } from '../models/article.model';
 import { ResponseError } from '../error/response.error';
 import { IUserRequest } from '../interface/user.interface';
-import { IFormattedArticle, IPopulatedArticle } from '../interface/article.interface';
+import { IFormattedArticle, IPopulatedArticle, ISearchArticle } from '../interface/article.interface';
 import { Types } from 'mongoose'
 import { formattedArticle, formattedArticles } from '../utils/article.util';
 
@@ -45,8 +45,9 @@ export const create = async (req: Request, res: Response, next: NextFunction) : 
 
 export const get = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
     try {
-        const populatedArticles = await getPopulatedArticles();
+        const populatedArticles = await getPopulatedArticles(req.query);
         console.log(populatedArticles); // print untuk debug
+
         const formatArticles: IFormattedArticle[] = formattedArticles(populatedArticles);
         res.status(200).json({
             success: true,

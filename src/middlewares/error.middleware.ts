@@ -1,20 +1,50 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { fromZodError } from 'zod-validation-error';
-
 import { ResponseError, CustomZodError } from '../error/response.error';
+import { translate } from '@vitalets/google-translate-api';
 
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = async (err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err) {
-        console.error(err);
-        if (err.name === 'CastError') res.status(400).send('error: format ID tidak valid');
+        // console.error(err);
+        if (err.name === 'CastError') { 
+            res.status(400).json({
+                success: false,
+                message: 'Format ID tidak valid',
+                data: {}
+            });
+        }
         else if (err instanceof ZodError) {
-            const customZodError = new CustomZodError(err, 400);
-            res.status(customZodError.status).json({
-                success: customZodError.success,
-                message: fromZodError(customZodError).message,
-                data: customZodError.data
-            })
+            if (err.issues.length === 1) { // 1 Error
+                const customZodError = new CustomZodError(err, 400);
+                const issue = customZodError.errors[0];
+                const errorMessage = `${issue.path} ${issue.message}`;
+                const { text } = await translate(errorMessage, { to: 'id' });
+                res.status(customZodError.status).json({
+                    success: customZodError.success,
+                    message: text,
+                    data: customZodError.data
+                })
+            }
+
+            if (err.issues.length > 1) { // More than 1 Error
+                const customZodError = new CustomZodError(err, 400);
+                const errors = await Promise.all(customZodError.errors.map(
+                    async (error) => {
+                        const errorMessage = `${error.path[0]} ${error.message}`;
+                        const { text } = await translate(errorMessage, { to: 'id' });
+                        return {
+                            field: error.path[0],
+                            message: text
+                        };
+                    }
+                ));
+                res.status(customZodError.status).json({
+                    success: customZodError.success,
+                    message: 'Validasi gagal',
+                    data: customZodError.data,
+                    errors
+                });
+            }
         }
         else if (err instanceof ResponseError) {
             res.status(err.status).json({

@@ -8,7 +8,8 @@ import {
     get,
     logout,
     forget,
-    reset
+    reset,
+    duplicate
 } from '../controllers/user.controller';
 
 const userRoutes = Router();
@@ -20,5 +21,6 @@ userRoutes.patch('/', isLogin, update);
 userRoutes.get('/:id', get);
 userRoutes.post('/forget-password', isGuest, forget);
 userRoutes.post('/reset-password', isGuest, reset);
+userRoutes.post('/duplicate-email', duplicate);
 
 export { userRoutes };

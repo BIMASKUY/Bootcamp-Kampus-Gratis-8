@@ -45,6 +45,11 @@ Response Body Error :
 
 Endpoint : GET /api/articles
 
+Query Params:
+- title: string using like, optional 
+- content: string using like, optional 
+- author: string using like, optional
+
 Response Body Success : 
 
 ```json
@@ -124,20 +129,9 @@ Response Body Error :
 }
 ```
 
+## Delete Article API
 
-
-
-
-
-
-
-
-
-
-
-## Logout User API
-
-Endpoint : DELETE /api/users/logout
+Endpoint : DELETE /api/articles/:articleId
 
 Headers : 
 - Authorization : token
@@ -146,8 +140,9 @@ Response Body Success :
 
 ```json
 {
-    "data" : "OK",
-    "message" : "User berhasil logout"
+    "success" : true,
+    "message" : "Artikel berhasil dihapus",
+    "data" : {},
 }
 ```
 
@@ -155,37 +150,8 @@ Response Body Error :
 
 ```json
 {
-    "errros" : "Unauthorized"
-}
-```
-
-## Forgot Password User API
-
-Endpoint : POST /api/users/forgotpassword
-
-Request Body : 
-
-```json
-{
-    "email" : "bambang@gmail.com"
-}
-```
-
-Response Body Success : 
-
-```json
-{
-    "data" : {
-        "email" : "bambang@gmail.com"
-    },
-    "message" : "Reset akun telah dikirim ke email anda"
-}
-```
-
-Response Body Error : 
-
-```json
-{
-    "errros" : "Email tidak ditemukan"
+    "success": false,
+    "message": "Tidak memiliki hak akses untuk menghapus artikel ini",
+    "data": {}
 }
 ```
