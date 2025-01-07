@@ -77,3 +77,17 @@ export const resetPassword = async (newPassword: string, id: Types.ObjectId): Pr
 
   return updatedUser;
 }
+
+export const getUsers = async (): Promise<IUser[]> => {
+  const users: IUser[] = await User.find();
+  return users;
+}
+
+export const createAdmin = async (data: IUser): Promise<IUser> => {
+  const hashPassword: string = await bcrypt.hash(data.password, 10);
+  data.password = hashPassword;
+  data.role = 'admin';
+  const user: IUser = await User.create(data);
+
+  return user;
+}

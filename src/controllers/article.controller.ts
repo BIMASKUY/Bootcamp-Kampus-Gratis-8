@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { IArticle } from '../models/article.model';
 import { ResponseError } from '../error/response.error';
 import { IUserRequest } from '../interface/user.interface';
-import { IFormattedArticle, IPopulatedArticle, ISearchArticle } from '../interface/article.interface';
+import { IFormattedArticle, IPopulatedArticle } from '../interface/article.interface';
 import { Types } from 'mongoose'
 import { formattedArticle, formattedArticles } from '../utils/article.util';
 

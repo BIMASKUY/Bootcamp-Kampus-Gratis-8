@@ -193,9 +193,7 @@ export const transactionDeleteArticleWithCommentAndBookmark = async(articleId: T
         await session.endSession();
         return false;
     }
-
-    console.log('halo dek')
-
+    
     const deleteBookmarks = await deleteBookmarksByArticleId(articleId);
     if (!deleteBookmarks) {
         await session.abortTransaction();

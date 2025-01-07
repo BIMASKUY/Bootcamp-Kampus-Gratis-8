@@ -4,13 +4,13 @@ export const formattedArticle = (article: IPopulatedArticle): IFormattedArticle 
     return {
         title: article.title,
         content: article.content,
-        author: article.author?.name || 'Unknown', // Ensure article.author is defined
-        likedBy: article.likedBy?.map(user => user?.name || 'Unknown') || [], // Ensure likedBy exists
+        author: article.author?.name || 'Unknown',
+        likedBy: article.likedBy?.map(user => user?.name || 'Unknown') || [], 
         comments: article.comments?.map(comment => ({
             text: comment.text,
-            author: comment.author?.name || 'Unknown', // Ensure comment.author is defined
-            likedBy: comment.likedBy?.map(user => user?.name || 'Unknown') || [] // Ensure comment.likedBy exists
-        })) || [] // Ensure comments exist
+            author: comment.author?.name || 'Unknown', 
+            likedBy: comment.likedBy?.map(user => user?.name || 'Unknown') || []
+        })) || [] 
     }
 }
 

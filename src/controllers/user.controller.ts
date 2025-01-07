@@ -6,6 +6,7 @@ import { getPayload, decodeJwt } from '../auth/jwt.auth';
 import { Types } from 'mongoose';
 import { forgetPassword } from '../services/email.service';
 import { storeSession, invalidSession } from '../services/session.service'
+import { updateDailyActiveUsers } from '../services/daily.service';
 
 import { 
   UserType,
@@ -30,6 +31,8 @@ import {
   getUserById,
   stringToObjectId,
   resetPassword,
+  getUsers,
+  createAdmin
 } from '../services/user.service';
 
 export const create = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
@@ -66,6 +69,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
     const token: string = await getPayload(user);
     const success: boolean = await storeSession(token);
     if (!success) throw new ResponseError(500, 'Token tidak tersimpan')
+
+    const userId = user._id as Types.ObjectId;
+    await updateDailyActiveUsers(userId);
 
     res.status(200).json({
       success: true,
@@ -193,6 +199,55 @@ export const duplicate = async (req: Request, res: Response, next: NextFunction)
       success: true,
       message: 'Email tersedia',
       data: {}
+    });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export const getAll = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+  try {
+    const userReq: IUserRequest = req as IUserRequest;
+    const user = await getUserById(userReq.userId);
+    if (!user) throw new ResponseError(404, 'User tidak ditemukan');
+    if (user.role !== 'admin') throw new ResponseError(403, 'Forbidden');
+
+    const users: IUser[] = await getUsers();
+
+    const formattedUsers = users.map((user) => {
+      return {
+        email: user.email,
+        name: user.name,
+        role: user.role
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      total: formattedUsers.length,
+      data: formattedUsers,
+      message: 'Semua user berhasil didapatkan'
+    });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export const admin = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+  try {
+    const data: UserType = validateInputUserSchema(req.body);
+    const findUser: IUser | null = await getUserByEmail(data.email);
+    if (findUser) throw new ResponseError(409, 'Email sudah digunakan');
+
+    const admin: IUser = await createAdmin(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: {
+        email: admin.email,
+        name: admin.name
+      },
+      message: 'Admin berhasil terdaftar'
     });
   } catch (e) {
     next(e);

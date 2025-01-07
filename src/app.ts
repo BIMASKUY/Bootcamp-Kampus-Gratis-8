@@ -4,6 +4,7 @@ import { userRoutes }  from './routes/user.route';
 import { articleRoutes } from './routes/article.route';
 import { commentRoutes } from './routes/comment.route';
 import { bookmarkRoutes } from './routes/bookmark.route';
+import { dailyRoutes } from './routes/daily.route';
 import { logger } from './middlewares/logger.middleware';
 import { errorHandler } from './middlewares/error.middleware';
 import { databaseConnection } from './databases/db.database';
@@ -21,6 +22,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/daily', dailyRoutes);
 app.use(errorHandler);
 
 export default app;
