@@ -46,7 +46,6 @@ export const create = async (req: Request, res: Response, next: NextFunction) : 
 export const get = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
     try {
         const populatedArticles = await getPopulatedArticles(req.query);
-        console.log(populatedArticles); // print untuk debug
 
         const formatArticles: IFormattedArticle[] = formattedArticles(populatedArticles);
         res.status(200).json({
